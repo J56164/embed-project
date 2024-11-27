@@ -2,7 +2,7 @@
 #include <esp_wifi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <FirebaseClient.h>
+#include <Firebase_ESP_Client.h>
 const char *SSID = "AndroidAP558F";
 const char *PASSWORD = "asdf1234";
 
@@ -12,15 +12,19 @@ const char *PASSWORD = "asdf1234";
 #include <esp_now.h>
 #include <WiFi.h>
 
-#include <WiFiClientSecure.h>
-WiFiClientSecure ssl;
-DefaultNetwork network;
-AsyncClientClass client(ssl, getNetwork(network));
+#include "addons/TokenHelper.h"
+#include "addons/RTDBHelper.h"
 
-FirebaseApp app;
-RealtimeDatabase Database;
-AsyncResult result;
-NoAuth noAuth;
+// Define Firebase Data object.
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig config;
+unsigned long sendDataPrevMillis = 0;
+const long sendDataIntervalMillis = 10000;
+bool signupOK = false;
+
+float store_random_Float_Val;
+int store_random_Int_Val;
 
 typedef struct struct_message
 {
@@ -54,41 +58,31 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 
 void setupFirebase()
 {
-  // Initialize Firebase
-  Firebase.printf("Firebase Client v%s\n", FIREBASE_CLIENT_VERSION);
+  config.api_key = API_KEY;
 
-  ssl.setInsecure();
-#if defined(ESP8266)
-  ssl.setBufferSizes(1024, 1024);
-#endif
+  // Assign the RTDB URL (required).
+  config.database_url = DATABASE_URL;
 
-  // Initialize the authentication handler.
-  initializeApp(client, app, getAuth(noAuth));
-
-  // Binding the authentication handler with your Database class object.
-  app.getApp<RealtimeDatabase>(Database);
-
-  // Set your database URL
-  Database.url(DATABASE_URL);
-
-  // In sync functions, we have to set the operating result for the client that works with the function.
-  client.setAsyncResult(result);
-
-  // Set, push and get integer value
-
-  Serial.print("Set int... ");
-  bool status = Database.set<int>(client, "/test/int", 12345);
-  if (status)
+  // Sign up.
+  Serial.println();
+  Serial.println("---------------Sign up");
+  Serial.print("Sign up new user... ");
+  if (Firebase.signUp(&config, &auth, "", ""))
+  {
     Serial.println("ok");
+    signupOK = true;
+  }
   else
-    printError(client.lastError().code(), client.lastError().message());
+  {
+    Serial.printf("%s\n", config.signer.signupError.message.c_str());
+  }
+  Serial.println("---------------");
 
-  Serial.print("Push int... ");
-  String name = Database.push<int>(client, "/test/push", 12345);
-  if (client.lastError().code() == 0)
-    Firebase.printf("ok, name: %s\n", name.c_str());
-  else
-    printError(client.lastError().code(), client.lastError().message());
+  // Assign the callback function for the long running token generation task.
+  config.token_status_callback = tokenStatusCallback; //--> see addons/TokenHelper.h
+
+  Firebase.begin(&config, &auth);
+  Firebase.reconnectWiFi(true);
 }
 
 void setupWiFi()
@@ -129,9 +123,62 @@ void setup()
   setupFirebase();
 }
 
+void firebaseloop()
+{
+  // put your main code here, to run repeatedly:
+
+  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > sendDataIntervalMillis || sendDataPrevMillis == 0))
+  {
+    sendDataPrevMillis = millis();
+
+    //---------------------------------------- Generate random values.
+    int randNumber = random(15, 40);
+    float f = (float)randNumber / 1.01;
+    int i = (int(f * 100));
+    store_random_Float_Val = float(i) / 100;
+    store_random_Int_Val = random(10, 99);
+    //----------------------------------------
+
+    //----------------------------------------
+    Serial.println();
+    Serial.println("---------------Random Value");
+    Serial.print("Random Float_Val : ");
+    Serial.println(store_random_Float_Val);
+    Serial.print("Random Int_Val   : ");
+    Serial.println(store_random_Int_Val);
+    Serial.println("---------------");
+    //----------------------------------------
+
+    //---------------------------------------- The process of sending/storing data to the firebase database.
+    Serial.println();
+    Serial.println("---------------Store Data");
+
+    // Write an Int number on the database path test/random_Float_Val.
+    if (Firebase.RTDB.setFloat(&fbdo, "Test/random_Float_Val", store_random_Float_Val))
+    {
+      Serial.println("PASSED");
+    }
+    else
+    {
+      Serial.println("FAILED");
+    }
+
+    // Write an Float number on the database path test/random_Int_Val.
+    if (Firebase.RTDB.setInt(&fbdo, "Test/random_Int_Val", store_random_Int_Val))
+    {
+      Serial.println("PASSED");
+    }
+    else
+    {
+      Serial.println("FAILED");
+    }
+    Serial.println("---------------");
+  }
+}
+
 void loop()
 {
   getMacAddress();
-
+  firebaseloop();
   delay(1000);
 }
