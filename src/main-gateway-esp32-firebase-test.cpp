@@ -3,24 +3,15 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <FirebaseClient.h>
+
 const char *SSID = "AndroidAP558F";
 const char *PASSWORD = "asdf1234";
 
 #define API_KEY "AIzaSyCOS3vFkL0sX48M99Vh3mVlPFMDPytNbeY"
-#define DATABASE_URL "https://waterpot-a1e79-default-rtdb.firebaseio.com/"
+#define DATABASE_URL "https://console.firebase.google.com/u/0/project/waterpot-a1e79/database/waterpot-a1e79-default-rtdb/data/~2F"
 
 #include <esp_now.h>
 #include <WiFi.h>
-
-#include <WiFiClientSecure.h>
-WiFiClientSecure ssl;
-DefaultNetwork network;
-AsyncClientClass client(ssl, getNetwork(network));
-
-FirebaseApp app;
-RealtimeDatabase Database;
-AsyncResult result;
-NoAuth noAuth;
 
 typedef struct struct_message
 {
@@ -31,10 +22,6 @@ typedef struct struct_message
 } struct_message;
 
 struct_message myData;
-void printError(int code, const String &msg)
-{
-  Firebase.printf("Error, msg: %s, code: %d\n", msg.c_str(), code);
-}
 
 void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
@@ -54,41 +41,22 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 
 void setupFirebase()
 {
-  // Initialize Firebase
-  Firebase.printf("Firebase Client v%s\n", FIREBASE_CLIENT_VERSION);
-
-  ssl.setInsecure();
-#if defined(ESP8266)
-  ssl.setBufferSizes(1024, 1024);
-#endif
-
-  // Initialize the authentication handler.
-  initializeApp(client, app, getAuth(noAuth));
-
-  // Binding the authentication handler with your Database class object.
-  app.getApp<RealtimeDatabase>(Database);
-
-  // Set your database URL
-  Database.url(DATABASE_URL);
-
-  // In sync functions, we have to set the operating result for the client that works with the function.
-  client.setAsyncResult(result);
-
-  // Set, push and get integer value
-
-  Serial.print("Set int... ");
-  bool status = Database.set<int>(client, "/test/int", 12345);
-  if (status)
+  config.api_key = API_KEY;
+  config.database_url = DATABASE_URL;
+  if (Firebase.signUp(&config, &auth, "", ""))
+  {
     Serial.println("ok");
+    signupOK = true;
+  }
   else
-    printError(client.lastError().code(), client.lastError().message());
+  {
+    Serial.printf("%s\n", config.signer.signupError.message.c_str());
+  }
 
-  Serial.print("Push int... ");
-  String name = Database.push<int>(client, "/test/push", 12345);
-  if (client.lastError().code() == 0)
-    Firebase.printf("ok, name: %s\n", name.c_str());
-  else
-    printError(client.lastError().code(), client.lastError().message());
+  config.token_status_callback = tokenStatusCallback;
+
+  Firebase.begin(&config, &auth);
+  Firebase.reconnectWiFi(true);
 }
 
 void setupWiFi()
@@ -113,6 +81,40 @@ void getMacAddress()
   Serial.println(WiFi.macAddress());
 }
 
+void firebase()
+{
+  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0))
+  {
+    sendDataPrevMillis = millis();
+    // Write an Int number on the database path test/int
+    if (Firebase.RTDB.setInt(&fbdo, "test/int", count))
+    {
+      Serial.println("PASSED");
+      Serial.println("PATH: " + fbdo.dataPath());
+      Serial.println("TYPE: " + fbdo.dataType());
+    }
+    else
+    {
+      Serial.println("FAILED");
+      Serial.println("REASON: " + fbdo.errorReason());
+    }
+    count++;
+
+    // Write an Float number on the database path test/float
+    if (Firebase.RTDB.setFloat(&fbdo, "test/float", 0.01 + random(0, 100)))
+    {
+      Serial.println("PASSED");
+      Serial.println("PATH: " + fbdo.dataPath());
+      Serial.println("TYPE: " + fbdo.dataType());
+    }
+    else
+    {
+      Serial.println("FAILED");
+      Serial.println("REASON: " + fbdo.errorReason());
+    }
+  }
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -132,6 +134,6 @@ void setup()
 void loop()
 {
   getMacAddress();
-
+  firebase();
   delay(1000);
 }
