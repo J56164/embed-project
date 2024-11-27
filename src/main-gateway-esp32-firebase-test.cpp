@@ -7,7 +7,7 @@ const char *SSID = "AndroidAP558F";
 const char *PASSWORD = "asdf1234";
 
 #define API_KEY "AIzaSyCOS3vFkL0sX48M99Vh3mVlPFMDPytNbeY"
-#define DATABASE_URL "https://waterpot-a1e79-default-rtdb.firebaseio.com/"
+#define DATABASE_URL "https://waterpot-a1e79-default-rtdb.asia-southeast1.firebasedatabase.app/"
 
 #include <esp_now.h>
 #include <WiFi.h>
@@ -110,7 +110,7 @@ void getMacAddress()
 void setup()
 {
   Serial.begin(9600);
-  // setupWiFi();
+  setupWiFi();
   WiFi.mode(WIFI_STA);
 
   if (esp_now_init() != ESP_OK)
