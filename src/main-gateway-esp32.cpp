@@ -2,9 +2,8 @@
 #include <esp_wifi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <Firebase_ESP_Client.h>
-#include "addons/TokenHelper.h"
-#include "addons/RTDBHelper.h"
+#include <FirebaseClient.h>
+
 const char *SSID = "AndroidAP558F";
 const char *PASSWORD = "asdf1234";
 
@@ -14,7 +13,8 @@ const char *PASSWORD = "asdf1234";
 #include <esp_now.h>
 #include <WiFi.h>
 
-typedef struct struct_message{
+typedef struct struct_message
+{
   char a[32];
   int b;
   float c;
@@ -23,7 +23,8 @@ typedef struct struct_message{
 
 struct_message myData;
 
-void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
+void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
+{
   memcpy(&myData, incomingData, sizeof(myData));
   Serial.print("Bytes received: ");
   Serial.println(len);
@@ -117,10 +118,11 @@ void firebase()
 void setup()
 {
   Serial.begin(9600);
-  //setupWiFi();
+  // setupWiFi();
   WiFi.mode(WIFI_STA);
 
-  if (esp_now_init() != ESP_OK){
+  if (esp_now_init() != ESP_OK)
+  {
     Serial.println("Error initializing ESP-NOW");
     return;
   }
