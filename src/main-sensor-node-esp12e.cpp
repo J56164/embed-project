@@ -65,7 +65,7 @@ void setup()
 {
   pinMode(LED, OUTPUT);
   dht.begin();
-  // pinMode(SOIL_1, INPUT);
+  // pinMode(SOIL_ANALOG_PIN, INPUT);
   // pinMode(SOIL_2, INPUT);
   pinMode(PUMP, OUTPUT);
   Serial.begin(9600);
