@@ -2,7 +2,6 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include "libs/sensors.h"
 #include <espnow.h>
 
 uint8_t broadcastAddress[6] = {0x88, 0x13, 0xBF, 0x0C, 0x31, 0xA4};
@@ -53,21 +52,8 @@ void getMacAddress()
   Serial.println(WiFi.macAddress());
 }
 
-void blinkLed()
-{
-  digitalWrite(LED, HIGH);
-  delay(1000);
-  digitalWrite(LED, LOW);
-  delay(1000);
-}
-
 void setup()
 {
-  pinMode(LED, OUTPUT);
-  dht.begin();
-  // pinMode(SOIL_ANALOG_PIN, INPUT);
-  // pinMode(SOIL_2, INPUT);
-  pinMode(PUMP, OUTPUT);
   Serial.begin(9600);
   // setupWiFi();
 
@@ -84,11 +70,6 @@ void setup()
 
 void loop()
 {
-  // blinkLed();
-  // getSoil();
-  // getDht();
-  // getLight();
-  // enablePump();
   getMacAddress();
 
   strcpy(myData.a, "THIS IS A CHAR");

@@ -10,7 +10,9 @@ DHT dht(DHT_PIN, DHT_TYPE);
 
 #define LIGHT_PIN 15
 
-#define PUMP_PIN 19
+#define PUMP_PIN 21
+#define PUMP_CONTROL_A_PIN 22
+#define PUMP_CONTROL_B_PIN 23
 
 void setupSoilSensor()
 {
@@ -44,18 +46,25 @@ uint16_t getLightReading()
 
 void enablePump()
 {
-  digitalWrite(PUMP_PIN, HIGH);
+  analogWrite(PUMP_PIN, HIGH);
+  digitalWrite(PUMP_CONTROL_A_PIN, HIGH);
+  digitalWrite(PUMP_CONTROL_B_PIN, LOW);
 }
 
 void disablePump()
 {
-  digitalWrite(PUMP_PIN, LOW);
+  analogWrite(PUMP_PIN, LOW);
+  digitalWrite(PUMP_CONTROL_A_PIN, HIGH);
+  digitalWrite(PUMP_CONTROL_B_PIN, LOW);
 }
 
 void setup()
 {
   Serial.begin(9600);
   setupSoilSensor();
+  pinMode(PUMP_PIN, OUTPUT);
+  pinMode(PUMP_CONTROL_A_PIN, OUTPUT);
+  pinMode(PUMP_CONTROL_B_PIN, OUTPUT);
   dht.begin();
 }
 
