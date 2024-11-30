@@ -2,7 +2,7 @@
 
 #ifdef BOARD_ESP32
 #include "sensors/sensors-esp32.h"
-#else
+#elif BOARD_ESP8266
 #include "sensors/sensors-esp8266.h"
 #endif
 

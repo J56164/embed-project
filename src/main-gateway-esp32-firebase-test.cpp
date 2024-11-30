@@ -9,8 +9,10 @@ void setup()
 
 void loop()
 {
-  MyFirebase::sendData();
-  MyFirebase::readData();
+  MyFirebase::sendFloatData("Sensors/Humidity", 3.14);
+  MyFirebase::sendIntData("Sensors/SoilMoisture", 1234);
+  MyFirebase::readFloatData("Sensors/Humidity");
+  MyFirebase::readIntData("Sensors/SoilMoisture");
 
   delay(1000);
 }

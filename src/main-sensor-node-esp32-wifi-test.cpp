@@ -6,8 +6,7 @@
 */
 
 #include <Arduino.h>
-#include <esp_now.h>
-#include <WiFi.h>
+#include "libs/wifi.h"
 
 uint8_t broadcastAddress[6] = {0xC4, 0x5B, 0xBE, 0x6F, 0xBD, 0x0B};
 
@@ -18,13 +17,12 @@ typedef struct struct_message
   char a[32];
   int b;
   float c;
-  bool d;
+  String d;
+  bool e;
 } struct_message;
 
 // Create a struct_message called myData
 struct_message myData;
-
-esp_now_peer_info_t peerInfo;
 
 // callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
@@ -33,56 +31,42 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
-void setup()
-{
-  // Init Serial Monitor
-  Serial.begin(9600);
-
-  // Set device as a Wi-Fi Station
-  WiFi.mode(WIFI_STA);
-
-  // Init ESP-NOW
-  if (esp_now_init() != ESP_OK)
-  {
-    Serial.println("Error initializing ESP-NOW");
-    return;
-  }
-
-  // Once ESPNow is successfully Init, we will register for Send CB to
-  // get the status of Trasnmitted packet
-  esp_now_register_send_cb(OnDataSent);
-
-  // Register peer
-  memcpy(peerInfo.peer_addr, broadcastAddress, 6);
-  peerInfo.channel = 0;
-  peerInfo.encrypt = false;
-
-  // Add peer
-  if (esp_now_add_peer(&peerInfo) != ESP_OK)
-  {
-    Serial.println("Failed to add peer");
-    return;
-  }
-}
-
-void loop()
+void sendData()
 {
   // Set values to send
   strcpy(myData.a, "THIS IS A CHAR");
   myData.b = random(1, 20);
   myData.c = 1.2;
-  myData.d = false;
+  myData.d = "Hello";
+  myData.e = false;
 
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
+  bool isDataSent = WiFiWrapper::sendData(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
 
-  if (result == ESP_OK)
+  if (isDataSent)
   {
-    Serial.println("Sent with success");
+    Serial.println("Data sent successfully");
   }
   else
   {
-    Serial.println("Error sending the data");
+    Serial.println("Error sending data");
   }
+}
+
+void setup()
+{
+  // Init Serial Monitor
+  Serial.begin(9600);
+  WiFiWrapper::setWiFiMode(WIFI_STA);
+  WiFiWrapper::setupWiFi();
+  WiFiWrapper::setupESPNow(false);
+  WiFiWrapper::addPeer(broadcastAddress);
+  WiFiWrapper::registerSendCallback(OnDataSent);
+}
+
+void loop()
+{
+  Serial.println(WiFiWrapper::getMacAddress());
+  sendData();
   delay(1000);
 }
