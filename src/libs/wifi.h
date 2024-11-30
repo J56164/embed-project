@@ -1,4 +1,4 @@
-namespace Wifi
+namespace WiFi
 {
 
 }
