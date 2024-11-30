@@ -1,0 +1,3 @@
+#define PUMP_PIN 21
+#define PUMP_CONTROL_A_PIN 22
+#define PUMP_CONTROL_B_PIN 23

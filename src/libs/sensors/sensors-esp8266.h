@@ -1,0 +1,6 @@
+#define SOIL_ANALOG_PIN A0
+#define SOIL_DIGITAL_PIN D1
+
+#define DHT_PIN D2
+
+#define LIGHT_PIN A0
