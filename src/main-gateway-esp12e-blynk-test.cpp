@@ -1,8 +1,5 @@
 #include <Arduino.h>
-#include "blynk-esp8266.h"
-
-// Define the timer instance
-BlynkTimer timer;
+#include "libs/blynk.h"
 
 void myTimerEvent()
 {
@@ -12,12 +9,11 @@ void myTimerEvent()
 void setup()
 {
   Serial.begin(9600);
-  setupBlynk();
-  timer.setInterval(10000L, myTimerEvent);
+  BlynkWrapper::setupBlynk();
+  BlynkWrapper::setTimerInterval(10000L, myTimerEvent);
 }
 
 void loop()
 {
-  Blynk.run();
-  timer.run();
+  BlynkWrapper::run();
 }
