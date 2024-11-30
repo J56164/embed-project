@@ -6,7 +6,7 @@
 #include "pump/pump-esp8266.h"
 #endif
 
-namespace Pump
+namespace PumpWrapper
 {
     void enablePump()
     {

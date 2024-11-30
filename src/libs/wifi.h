@@ -1,3 +1,6 @@
+#ifndef WIFI_H
+#define WIFI_H
+
 #ifdef BOARD_ESP32
 #include "wifi/wifi-esp32.h"
 #elif BOARD_ESP8266
@@ -70,3 +73,5 @@ namespace WiFiWrapper
         return esp_now_send(broadcastAddress, data, len) == ESP_OK;
     }
 }
+
+#endif // WIFI_H

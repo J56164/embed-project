@@ -6,7 +6,7 @@
 #define API_KEY "AIzaSyCOS3vFkL0sX48M99Vh3mVlPFMDPytNbeY"
 #define DATABASE_URL "https://waterpot-a1e79-default-rtdb.asia-southeast1.firebasedatabase.app/"
 
-namespace MyFirebase // Renamed to avoid conflict
+namespace FirebaseWrapper // Renamed to avoid conflict
 {
     FirebaseData fbdo;
     FirebaseAuth auth;
@@ -42,6 +42,26 @@ namespace MyFirebase // Renamed to avoid conflict
         {
             Serial.printf("Sending data to Firebase: %s\n", path);
             if (Firebase.RTDB.setFloat(&fbdo, path, value))
+            {
+                Serial.println("Data sent successfully.");
+            }
+            else
+            {
+                Serial.printf("Failed to send data: %s\n", fbdo.errorReason().c_str());
+            }
+        }
+        else
+        {
+            Serial.println("Firebase is not ready or signup failed!");
+        }
+    }
+
+    void sendBoolData(const char *path, bool value)
+    {
+        if (Firebase.ready() && signupOK)
+        {
+            Serial.printf("Sending data to Firebase: %s\n", path);
+            if (Firebase.RTDB.setBool(&fbdo, path, value))
             {
                 Serial.println("Data sent successfully.");
             }
@@ -166,6 +186,29 @@ namespace MyFirebase // Renamed to avoid conflict
             Serial.println("Firebase is not ready or signup failed!");
         }
         return 0.0;
+    }
+
+    bool readBoolData(const char *path)
+    {
+        if (Firebase.ready() && signupOK)
+        {
+            Serial.printf("Reading data from Firebase: %s\n", path);
+            if (Firebase.RTDB.getBool(&fbdo, path))
+            {
+                bool value = fbdo.boolData();
+                Serial.printf("Data read successfully: %s\n", value ? "true" : "false");
+                return value;
+            }
+            else
+            {
+                Serial.printf("Failed to read data: %s\n", fbdo.errorReason().c_str());
+            }
+        }
+        else
+        {
+            Serial.println("Firebase is not ready or signup failed!");
+        }
+        return false;
     }
 
     int readIntData(const char *path)

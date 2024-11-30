@@ -1,3 +1,6 @@
+#ifndef WIFI_ESP8266_H
+#define WIFI_ESP8266_H
+
 #include <ESP8266WiFi.h>
 #include <espnow.h>
 
@@ -13,3 +16,5 @@ namespace WiFiWrapper
         esp_now_set_self_role(isController ? ESP_NOW_ROLE_CONTROLLER : ESP_NOW_ROLE_SLAVE);
     }
 }
+
+#endif // WIFI_ESP8266_H

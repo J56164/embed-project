@@ -4,34 +4,34 @@
 void setup()
 {
   Serial.begin(9600);
-  Sensors::setupSensors();
+  SensorsWrapper::setupSensors();
 }
 
 void loop()
 {
   Serial.print("Soil reading: ");
-  Serial.println(Sensors::getSoilReading());
+  Serial.println(SensorsWrapper::getSoilReading());
 
   Serial.print("Is soil wet?: ");
-  Serial.println(Sensors::isSoilWet());
+  Serial.println(SensorsWrapper::isSoilWet());
 
   Serial.print("Humidity: ");
-  Serial.print(Sensors::getHumidityReading());
+  Serial.print(SensorsWrapper::getHumidityReading());
   Serial.println("%");
 
   Serial.print("Temperature: ");
-  Serial.print(Sensors::getTemperatureReading());
+  Serial.print(SensorsWrapper::getTemperatureReading());
   Serial.println(" Celsius");
 
   Serial.print("Light reading: ");
-  Serial.println(Sensors::getLightReading());
+  Serial.println(SensorsWrapper::getLightReading());
 
   Serial.println("---------------");
 
-  Sensors::enablePump();
+  SensorsWrapper::enablePump();
   Serial.println("Pump enabled.");
   delay(1000);
-  Sensors::disablePump();
+  SensorsWrapper::disablePump();
   Serial.println("Pump disabled.");
 
   delay(3000);

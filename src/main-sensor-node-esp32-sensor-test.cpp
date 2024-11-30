@@ -1,39 +1,38 @@
 #include <Arduino.h>
-#include <LittleFS.h>
 #include "libs/sensors.h"
 #include "libs/pump.h"
 
 void setup()
 {
   Serial.begin(9600);
-  Sensors::setupSensors();
+  SensorsWrapper::setupSensors();
 }
 
 void loop()
 {
   Serial.print("Soil reading: ");
-  Serial.println(Sensors::getSoilReading());
+  Serial.println(SensorsWrapper::getSoilReading());
 
   Serial.print("Is soil wet?: ");
-  Serial.println(Sensors::isSoilWet());
+  Serial.println(SensorsWrapper::isSoilWet());
 
   Serial.print("Humidity: ");
-  Serial.print(Sensors::getHumidityReading());
+  Serial.print(SensorsWrapper::getHumidityReading());
   Serial.println("%");
 
   Serial.print("Temperature: ");
-  Serial.print(Sensors::getTemperatureReading());
+  Serial.print(SensorsWrapper::getTemperatureReading());
   Serial.println(" Celsius");
 
   Serial.print("Light reading: ");
-  Serial.println(Sensors::getLightReading());
+  Serial.println(SensorsWrapper::getLightReading());
 
   Serial.println("---------------");
 
-  Pump::enablePump();
+  PumpWrapper::enablePump();
   Serial.println("Pump enabled.");
   delay(1000);
-  Pump::disablePump();
+  PumpWrapper::disablePump();
   Serial.println("Pump disabled.");
 
   delay(3000);

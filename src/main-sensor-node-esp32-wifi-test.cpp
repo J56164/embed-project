@@ -31,7 +31,7 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
-void sendData()
+void sendSensorData()
 {
   // Set values to send
   strcpy(myData.a, "THIS IS A CHAR");
@@ -67,6 +67,6 @@ void setup()
 void loop()
 {
   Serial.println(WiFiWrapper::getMacAddress());
-  sendData();
+  sendSensorData();
   delay(1000);
 }

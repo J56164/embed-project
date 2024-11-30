@@ -1,3 +1,6 @@
+#ifndef WIFI_ESP32_H
+#define WIFI_ESP32_H
+
 #include <esp_now.h>
 #include <WiFi.h>
 
@@ -19,3 +22,5 @@ namespace WiFiWrapper
         // esp_now_set_self_role is not available in esp_now.h
     }
 }
+
+#endif // WIFI_ESP32_H

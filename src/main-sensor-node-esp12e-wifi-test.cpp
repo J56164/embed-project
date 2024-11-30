@@ -27,7 +27,7 @@ void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus)
   }
 }
 
-void sendData()
+void sendSensorData()
 {
   strcpy(myData.a, "THIS IS A CHAR");
   myData.b = random(1, 20);
@@ -61,6 +61,6 @@ void setup()
 void loop()
 {
   Serial.println(WiFiWrapper::getMacAddress());
-  sendData();
+  sendSensorData();
   delay(1000);
 }

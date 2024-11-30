@@ -4,15 +4,15 @@
 void setup()
 {
   Serial.begin(9600);
-  MyFirebase::setupFirebase();
+  FirebaseWrapper::setupFirebase();
 }
 
 void loop()
 {
-  MyFirebase::sendFloatData("Sensors/Humidity", 3.14);
-  MyFirebase::sendIntData("Sensors/SoilMoisture", 1234);
-  MyFirebase::readFloatData("Sensors/Humidity");
-  MyFirebase::readIntData("Sensors/SoilMoisture");
+  FirebaseWrapper::sendFloatData("Sensors/Humidity", 3.14);
+  FirebaseWrapper::sendIntData("Sensors/SoilMoisture", 1234);
+  FirebaseWrapper::readFloatData("Sensors/Humidity");
+  FirebaseWrapper::readIntData("Sensors/SoilMoisture");
 
   delay(1000);
 }

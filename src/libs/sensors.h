@@ -8,7 +8,7 @@
 
 #define DHT_TYPE DHT21
 
-namespace Sensors
+namespace SensorsWrapper
 {
     DHT dht(DHT_PIN, DHT_TYPE);
 
