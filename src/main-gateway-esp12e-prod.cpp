@@ -54,6 +54,16 @@ void sendDataToFirebase()
   Serial.println("Data sent to Firebase");
 }
 
+// TODO: Try to retrieve the humidity threshold from Firebase and store it in the ESP32.
+
+// TODO: When the user changes the humidity threshold on the Blynk app, the value is stored
+// both in the ESP32 and in Firebase.
+
+// TODO: When the sensor readings are received, the ESP32 compares the humidity reading with
+// the humidity threshold. If the humidity reading is greater than the threshold, the ESP32
+// communicates with the ESP8266 to turn on the water pump for a certain amount of time
+// and then turn it off. Then, the ESP32 sends a notification to the user's phone via Blynk.
+
 void setup()
 {
   Serial.begin(9600);
