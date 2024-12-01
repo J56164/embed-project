@@ -56,6 +56,8 @@ void checkHumidityAndControlPump()
     PumpWrapper::enablePump();
     isPumpActive = true;
     pumpActivationStartTime = millis();
+
+    Blynk.logEvent("pump", "The pump has been activated.");
   }
 }
 
