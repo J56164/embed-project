@@ -16,6 +16,8 @@ struct SensorData
 
 SensorData sensorData;
 
+float newHumidityThreshold;
+
 void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
 {
   memcpy(&sensorData, incomingData, sizeof(sensorData));
@@ -58,6 +60,13 @@ void sendDataToFirebase()
 
 // TODO: When the user changes the humidity threshold on the Blynk app, the value is stored
 // both in the ESP32 and in Firebase.
+void updateHumidityThreshold(float newThreshold){
+  newHumidityThreshold = newThreshold;
+  Serial.println(newHumidityThreshold);
+
+  FirebaseWrapper::sendIntData("Sensors/Humidity",newHumidityThreshold)
+  Serial.println("Humidity Threshold saved to Firebase");
+}
 
 // TODO: When the sensor readings are received, the ESP32 compares the humidity reading with
 // the humidity threshold. If the humidity reading is greater than the threshold, the ESP32
