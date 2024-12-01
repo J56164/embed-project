@@ -7,11 +7,11 @@
 #include "libs/pump.h"
 struct SensorData
 {
-  int soilReading;
+  int soilMoisture;
   bool isSoilWet;
-  float humidity;
-  float temperature;
-  uint16_t light;
+  float airHumidity;
+  float airTemperature;
+  uint16_t lightLevel;
 };
 
 SensorData sensorData;
@@ -27,16 +27,16 @@ void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
   memcpy(&sensorData, incomingData, sizeof(sensorData));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  Serial.print("Soil Wetness: ");
-  Serial.println(sensorData.soilReading);
+  Serial.print("Soil Moisture: ");
+  Serial.println(sensorData.soilMoisture);
   Serial.print("Is Soil Wet: ");
   Serial.println(sensorData.isSoilWet);
-  Serial.print("Humidity: ");
-  Serial.println(sensorData.humidity);
-  Serial.print("Temperature: ");
-  Serial.println(sensorData.temperature);
-  Serial.print("Light: ");
-  Serial.println(sensorData.light);
+  Serial.print("Air Humidity: ");
+  Serial.println(sensorData.airHumidity);
+  Serial.print("Air Temperature: ");
+  Serial.println(sensorData.airTemperature);
+  Serial.print("Light Level: ");
+  Serial.println(sensorData.lightLevel);
   Serial.println();
 
   checkHumidityAndControlPump();
@@ -44,7 +44,7 @@ void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
 
 void checkHumidityAndControlPump()
 {
-  if (sensorData.humidity > newHumidityThreshold && !isPumpActive)
+  if (sensorData.airHumidity > newHumidityThreshold && !isPumpActive)
   {
     Serial.println("Activating pump.");
     PumpWrapper::enablePump();
@@ -65,43 +65,43 @@ void handlePumpDeactivation()
 
 void sendDataToBlynk()
 {
-  Blynk.virtualWrite(V1, sensorData.soilReading);
+  Blynk.virtualWrite(V1, sensorData.soilMoisture);
   Blynk.virtualWrite(V2, sensorData.isSoilWet);
-  Blynk.virtualWrite(V3, sensorData.humidity);
-  Blynk.virtualWrite(V4, sensorData.temperature);
-  Blynk.virtualWrite(V5, sensorData.light);
+  Blynk.virtualWrite(V3, sensorData.airHumidity);
+  Blynk.virtualWrite(V4, sensorData.airTemperature);
+  Blynk.virtualWrite(V5, sensorData.lightLevel);
   Serial.println("Data sent to Blynk");
 }
 
 void sendDataToFirebase()
 {
-  FirebaseWrapper::sendIntData("Sensors/SoilReading", sensorData.soilReading);
+  FirebaseWrapper::sendIntData("Sensors/SoilMoisture", sensorData.soilMoisture);
   FirebaseWrapper::sendBoolData("Sensors/IsSoilWet", sensorData.isSoilWet);
-  FirebaseWrapper::sendFloatData("Sensors/Humidity", sensorData.humidity);
-  FirebaseWrapper::sendFloatData("Sensors/Temperature", sensorData.temperature);
-  FirebaseWrapper::sendIntData("Sensors/Light", sensorData.light);
+  FirebaseWrapper::sendFloatData("Sensors/AirHumidity", sensorData.airHumidity);
+  FirebaseWrapper::sendFloatData("Sensors/AirTemperature", sensorData.airTemperature);
+  FirebaseWrapper::sendIntData("Sensors/LightLevel", sensorData.lightLevel);
   Serial.println("Data sent to Firebase");
 }
 
-// TODO: Try to retrieve the humidity threshold from Firebase and store it in the ESP32.
+// TODO: Try to retrieve the soil moisture threshold from Firebase and store it in the ESP32.
 void getHumidityThresholdFromFirebase()
 {
-  newHumidityThreshold = FirebaseWrapper::readIntData("Config/HumidityThreshold");
+  newHumidityThreshold = FirebaseWrapper::readIntData("Config/SoilMoistureThreshold");
 }
 
-// TODO: When the user changes the humidity threshold on the Blynk app, the value is stored
+// TODO: When the user changes the soil moisture threshold on the Blynk app, the value is stored
 // both in the ESP32 and in Firebase.
 void updateHumidityThreshold(float newThreshold)
 {
   newHumidityThreshold = newThreshold;
   Serial.println(newHumidityThreshold);
 
-  FirebaseWrapper::sendFloatData("Config/HumidityThreshold", newHumidityThreshold);
-  Serial.println("Humidity Threshold saved to Firebase");
+  FirebaseWrapper::sendFloatData("Config/SoilMoistureThreshold", newHumidityThreshold);
+  Serial.println("Soil Moisture Threshold saved to Firebase");
 }
 
-// TODO: When the sensor readings are received, the ESP32 compares the humidity reading with
-// the humidity threshold. If the humidity reading is greater than the threshold, the ESP32
+// TODO: When the sensor readings are received, the ESP32 compares the soil moisture reading with
+// the soil moisture threshold. If the soil moisture reading is greater than the threshold, the ESP32
 // communicates with the ESP8266 to turn on the water pump for a certain amount of time
 // and then turn it off. Then, the ESP32 sends a notification to the user's phone via Blynk.
 

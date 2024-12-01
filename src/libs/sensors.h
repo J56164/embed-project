@@ -17,7 +17,7 @@ namespace SensorsWrapper
         pinMode(SOIL_DIGITAL_PIN, INPUT);
     }
 
-    int getSoilReading()
+    int getSoilMoisture()
     {
         return analogRead(SOIL_ANALOG_PIN);
     }
@@ -27,17 +27,17 @@ namespace SensorsWrapper
         return !(bool)digitalRead(SOIL_DIGITAL_PIN);
     }
 
-    float getHumidityReading()
+    float getAirHumidity()
     {
         return dht.readHumidity();
     }
 
-    float getTemperatureReading()
+    float getAirTemperature()
     {
         return dht.readTemperature();
     }
 
-    uint16_t getLightReading()
+    uint16_t getLightLevel()
     {
         return analogRead(LIGHT_PIN);
     }

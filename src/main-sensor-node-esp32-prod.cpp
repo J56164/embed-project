@@ -7,22 +7,22 @@ uint8_t broadcastAddress[6] = {0xC4, 0x5B, 0xBE, 0x6F, 0xBD, 0x0B};
 
 struct SensorData
 {
-  int soilReading;
+  int soilMoisture;
   bool isSoilWet;
-  float humidity;
-  float temperature;
-  uint16_t light;
+  float airHumidity;
+  float airTemperature;
+  uint16_t lightLevel;
 };
 
 SensorData sensorData;
 
 void readSensors()
 {
-  sensorData.soilReading = SensorsWrapper::getSoilReading();
+  sensorData.soilMoisture = SensorsWrapper::getSoilMoisture();
   sensorData.isSoilWet = SensorsWrapper::isSoilWet();
-  sensorData.humidity = SensorsWrapper::getHumidityReading();
-  sensorData.temperature = SensorsWrapper::getTemperatureReading();
-  sensorData.light = SensorsWrapper::getLightReading();
+  sensorData.airHumidity = SensorsWrapper::getAirHumidity();
+  sensorData.airTemperature = SensorsWrapper::getAirTemperature();
+  sensorData.lightLevel = SensorsWrapper::getLightLevel();
 }
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)

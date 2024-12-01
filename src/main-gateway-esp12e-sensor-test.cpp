@@ -10,21 +10,21 @@ void setup()
 void loop()
 {
   Serial.print("Soil reading: ");
-  Serial.println(SensorsWrapper::getSoilReading());
+  Serial.println(SensorsWrapper::getSoilMoisture());
 
   Serial.print("Is soil wet?: ");
   Serial.println(SensorsWrapper::isSoilWet());
 
   Serial.print("Humidity: ");
-  Serial.print(SensorsWrapper::getHumidityReading());
+  Serial.print(SensorsWrapper::getAirHumidity());
   Serial.println("%");
 
   Serial.print("Temperature: ");
-  Serial.print(SensorsWrapper::getTemperatureReading());
+  Serial.print(SensorsWrapper::getAirTemperature());
   Serial.println(" Celsius");
 
   Serial.print("Light reading: ");
-  Serial.println(SensorsWrapper::getLightReading());
+  Serial.println(SensorsWrapper::getLightLevel());
 
   Serial.println("---------------");
 
