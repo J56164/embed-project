@@ -122,6 +122,7 @@ void setup()
 
   // Setup Firebase
   FirebaseWrapper::setupFirebase();
+  getHumidityThresholdFromFirebase();
 
   // Setup Pump
   PumpWrapper::setupPump();
