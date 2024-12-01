@@ -5,6 +5,11 @@
 #include "libs/blynk.h"
 #include "libs/firebase.h"
 #include "libs/pump.h"
+
+void checkHumidityAndControlPump();
+
+uint8_t broadcastAddress[6] = {0x88, 0x13, 0xBF, 0x0C, 0x31, 0xA4};
+
 struct SensorData
 {
   int soilMoisture;
@@ -16,7 +21,7 @@ struct SensorData
 
 SensorData sensorData;
 
-float soilMoistureThreshold;
+float soilMoistureThreshold = 0;
 
 unsigned long pumpActivationStartTime = 0;
 bool isPumpActive = false;
@@ -118,7 +123,8 @@ void setup()
   // Setup WiFi
   WiFiWrapper::setWiFiMode(WIFI_AP_STA);
   WiFiWrapper::setupWiFi();
-  WiFiWrapper::setupESPNow(true); // ESPNow must be initialized after WiFi for some reason
+  WiFiWrapper::setupESPNow(); // ESPNow must be initialized after WiFi for some reason
+  WiFiWrapper::addPeer(broadcastAddress);
   WiFiWrapper::registerRecvCallback(OnDataRecv);
 
   // Setup Blynk

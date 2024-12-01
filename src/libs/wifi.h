@@ -45,14 +45,13 @@ namespace WiFiWrapper
         esp_now_register_send_cb(callback);
     }
 
-    bool setupESPNow(bool isController)
+    bool setupESPNow()
     {
         WiFi.macAddress(); // Somehow adding this line fixes the issue. I don't know why.
         if (esp_now_init() != ESP_OK)
         {
             return false;
         }
-        setSelfRole(isController);
         return true;
     }
 

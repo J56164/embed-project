@@ -70,7 +70,7 @@ void setup()
   // Setup WiFi
   WiFiWrapper::setWiFiMode(WIFI_STA);
   WiFiWrapper::setupWiFi();
-  WiFiWrapper::setupESPNow(false);
+  WiFiWrapper::setupESPNow();
   WiFiWrapper::addPeer(broadcastAddress);
   WiFiWrapper::registerSendCallback(OnDataSent);
 }

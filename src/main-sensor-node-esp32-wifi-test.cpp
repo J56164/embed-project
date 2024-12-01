@@ -59,7 +59,8 @@ void setup()
   Serial.begin(9600);
   WiFiWrapper::setWiFiMode(WIFI_STA);
   WiFiWrapper::setupWiFi();
-  WiFiWrapper::setupESPNow(false);
+  WiFiWrapper::setupESPNow();
+  WiFiWrapper::setSelfRole(false);
   WiFiWrapper::addPeer(broadcastAddress);
   WiFiWrapper::registerSendCallback(OnDataSent);
 }

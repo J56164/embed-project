@@ -35,7 +35,8 @@ void setup()
   Serial.begin(9600);
   WiFiWrapper::setWiFiMode(WIFI_AP_STA);
   WiFiWrapper::setupWiFi();
-  WiFiWrapper::setupESPNow(true); // ESPNow must be initialized after WiFi for some reason
+  WiFiWrapper::setupESPNow(); // ESPNow must be initialized after WiFi for some reason
+  WiFiWrapper::setSelfRole(true);
   WiFiWrapper::registerRecvCallback(OnDataRecv);
 }
 
