@@ -4,7 +4,6 @@
 #include "libs/wifi.h"
 #include "libs/blynk.h"
 #include "libs/firebase.h"
-#include "libs/pump.h"
 
 void checkHumidityAndControlPump();
 
@@ -19,7 +18,13 @@ struct SensorData
   uint16_t lightLevel;
 };
 
+struct PumpCommand
+{
+  bool isPumpActive;
+};
+
 SensorData sensorData;
+PumpCommand pumpCommand;
 
 float soilMoistureThreshold = 0;
 
@@ -42,6 +47,12 @@ void printSensorData()
   Serial.println();
 }
 
+void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus)
+{
+  Serial.print("\r\nLast Packet Send Status:\t");
+  Serial.println(sendStatus == 0 ? "Delivery Success" : "Delivery Fail");
+}
+
 void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
 {
   memcpy(&sensorData, incomingData, sizeof(sensorData));
@@ -49,8 +60,22 @@ void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
   Serial.println(len);
 
   printSensorData();
+}
 
-  checkHumidityAndControlPump();
+void sendPumpCommand()
+{
+  Serial.println("Sending pump command to sensor node...");
+
+  bool isCommandSent = WiFiWrapper::sendData(broadcastAddress, (uint8_t *)&pumpCommand, sizeof(pumpCommand));
+
+  if (isCommandSent)
+  {
+    Serial.println("Command sent successfully");
+  }
+  else
+  {
+    Serial.println("Error sending command");
+  }
 }
 
 void checkHumidityAndControlPump()
@@ -58,10 +83,9 @@ void checkHumidityAndControlPump()
   if (sensorData.soilMoisture > soilMoistureThreshold && !isPumpActive)
   {
     Serial.println("Activating pump.");
-    PumpWrapper::enablePump();
-    isPumpActive = true;
+    pumpCommand.isPumpActive = true;
+    sendPumpCommand();
     pumpActivationStartTime = millis();
-
     Blynk.logEvent("pump", "The pump has been activated.");
   }
 }
@@ -71,7 +95,7 @@ void handlePumpDeactivation()
   if (isPumpActive && (millis() - pumpActivationStartTime >= pumpActiveDuration))
   {
     Serial.println("Turning off pump after duration.");
-    PumpWrapper::disablePump();
+    sendPumpCommand();
     isPumpActive = false;
   }
 }
@@ -96,14 +120,11 @@ void sendDataToFirebase()
   Serial.println("Data sent to Firebase");
 }
 
-// TODO: Try to retrieve the soil moisture threshold from Firebase and store it in the ESP32.
 void getHumidityThresholdFromFirebase()
 {
   soilMoistureThreshold = FirebaseWrapper::readIntData("Config/SoilMoistureThreshold");
 }
 
-// TODO: When the user changes the soil moisture threshold on the Blynk app, the value is stored
-// both in the ESP32 and in Firebase.
 void updateHumidityThreshold(float newThreshold)
 {
   soilMoistureThreshold = newThreshold;
@@ -113,10 +134,11 @@ void updateHumidityThreshold(float newThreshold)
   Serial.println("Soil Moisture Threshold saved to Firebase");
 }
 
-// TODO: When the sensor readings are received, the ESP32 compares the soil moisture reading with
-// the soil moisture threshold. If the soil moisture reading is greater than the threshold, the ESP32
-// communicates with the ESP8266 to turn on the water pump for a certain amount of time
-// and then turn it off. Then, the ESP32 sends a notification to the user's phone via Blynk.
+BLYNK_WRITE(V6)
+{
+  String value = param.asString();
+  updateHumidityThreshold(value.toDouble());
+}
 
 void setup()
 {
@@ -124,26 +146,30 @@ void setup()
 
   // Setup WiFi
   WiFiWrapper::setWiFiMode(WIFI_AP_STA);
+  WiFi.disconnect();
+  delay(100);
+
   WiFiWrapper::setupWiFi();
-  WiFiWrapper::setupESPNow(); // ESPNow must be initialized after WiFi for some reason
+  WiFiWrapper::setupESPNow();
+  esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);
   WiFiWrapper::addPeer(broadcastAddress);
+  WiFiWrapper::registerSendCallback(OnDataSent);
   WiFiWrapper::registerRecvCallback(OnDataRecv);
+  WiFi.printDiag(Serial);
 
   // Setup Blynk
   BlynkWrapper::setupBlynk();
   BlynkWrapper::setTimerInterval(10000L, sendDataToBlynk);
   BlynkWrapper::setTimerInterval(10000L, sendDataToFirebase);
+  BlynkWrapper::setTimerInterval(10000L, checkHumidityAndControlPump);
+  BlynkWrapper::setTimerInterval(10000L, handlePumpDeactivation);
 
   // Setup Firebase
   FirebaseWrapper::setupFirebase();
   getHumidityThresholdFromFirebase();
-
-  // Setup Pump
-  PumpWrapper::setupPump();
 }
 
 void loop()
 {
   BlynkWrapper::run();
-  handlePumpDeactivation();
 }

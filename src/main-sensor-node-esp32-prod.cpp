@@ -14,7 +14,13 @@ struct SensorData
   uint16_t lightLevel;
 };
 
+struct PumpCommand
+{
+  bool isPumpActive;
+};
+
 SensorData sensorData;
+PumpCommand pumpCommand;
 
 void readSensors()
 {
@@ -40,10 +46,38 @@ void printSensorData()
   Serial.println();
 }
 
+void printPumpCommand()
+{
+  Serial.print("Pump active: ");
+  Serial.println(pumpCommand.isPumpActive);
+}
+
+void handlePumpCommand()
+{
+  if (pumpCommand.isPumpActive)
+  {
+    PumpWrapper::enablePump();
+  }
+  else
+  {
+    PumpWrapper::disablePump();
+  }
+}
+
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+}
+
+void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
+{
+  memcpy(&pumpCommand, incomingData, sizeof(pumpCommand));
+  Serial.print("Bytes received: ");
+  Serial.println(len);
+
+  printPumpCommand();
+  handlePumpCommand();
 }
 
 void sendSensorData()
@@ -67,12 +101,20 @@ void setup()
   // Setup sensors
   SensorsWrapper::setupSensors();
 
+  // Setup pump
+  PumpWrapper::setupPump();
+
   // Setup WiFi
-  WiFiWrapper::setWiFiMode(WIFI_STA);
+  WiFiWrapper::setWiFiMode(WIFI_AP_STA);
+  WiFi.disconnect();
+  delay(100);
+
   WiFiWrapper::setupWiFi();
   WiFiWrapper::setupESPNow();
   WiFiWrapper::addPeer(broadcastAddress);
   WiFiWrapper::registerSendCallback(OnDataSent);
+  WiFiWrapper::registerRecvCallback(OnDataRecv);
+  WiFi.printDiag(Serial);
 }
 
 void loop()

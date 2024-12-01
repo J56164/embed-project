@@ -47,7 +47,6 @@ namespace WiFiWrapper
 
     bool setupESPNow()
     {
-        WiFi.macAddress(); // Somehow adding this line fixes the issue. I don't know why.
         if (esp_now_init() != ESP_OK)
         {
             return false;
@@ -69,7 +68,17 @@ namespace WiFiWrapper
 
     bool sendData(uint8_t *broadcastAddress, uint8_t *data, size_t len)
     {
-        return esp_now_send(broadcastAddress, data, len) == ESP_OK;
+        int result = esp_now_send(broadcastAddress, data, len);
+        if (result == ESP_OK)
+        {
+            return true;
+        }
+        else
+        {
+            Serial.print("ESP-NOW Error: ");
+            Serial.println(result);
+            return false;
+        }
     }
 }
 
