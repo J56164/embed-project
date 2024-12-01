@@ -4,7 +4,7 @@
 #include "libs/wifi.h"
 #include "libs/blynk.h"
 #include "libs/firebase.h"
-
+#include "libs/pump.h"
 struct SensorData
 {
   int soilReading;
@@ -17,6 +17,10 @@ struct SensorData
 SensorData sensorData;
 
 float newHumidityThreshold;
+
+unsigned long pumpActivationStartTime = 0;
+bool isPumpActive = false;
+const unsigned long pumpActiveDuration = 10000; // 10 seconds
 
 void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
 {
@@ -34,6 +38,30 @@ void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
   Serial.print("Light: ");
   Serial.println(sensorData.light);
   Serial.println();
+
+  checkHumidityAndControlPump();
+}
+
+void checkHumidityAndControlPump()
+{
+  if (sensorData.humidity > newHumidityThreshold && !isPumpActive)
+  {
+    Serial.println("Activating pump.");
+    PumpWrapper::enablePump(); 
+    isPumpActive = true;
+    pumpActivationStartTime = millis(); 
+    
+  }
+}
+
+void handlePumpDeactivation()
+{
+  if (isPumpActive && (millis() - pumpActivationStartTime >= pumpActiveDuration))
+  {
+    Serial.println("Turning off pump after duration.");
+    PumpWrapper::disablePump();
+    isPumpActive = false;
+  }
 }
 
 void sendDataToBlynk()
@@ -64,7 +92,7 @@ void updateHumidityThreshold(float newThreshold){
   newHumidityThreshold = newThreshold;
   Serial.println(newHumidityThreshold);
 
-  FirebaseWrapper::sendIntData("Sensors/Humidity",newHumidityThreshold)
+  FirebaseWrapper::sendFloatData("Sensors/Humidity",newHumidityThreshold)
   Serial.println("Humidity Threshold saved to Firebase");
 }
 
@@ -90,9 +118,13 @@ void setup()
 
   // Setup Firebase
   FirebaseWrapper::setupFirebase();
+
+  // Setup Pump
+  PumpWrapper::setupPump();
 }
 
 void loop()
 {
   BlynkWrapper::run();
+  handlePumpDeactivation();
 }
