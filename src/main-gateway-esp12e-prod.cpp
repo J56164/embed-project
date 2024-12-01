@@ -16,17 +16,14 @@ struct SensorData
 
 SensorData sensorData;
 
-float newHumidityThreshold;
+float soilMoistureThreshold;
 
 unsigned long pumpActivationStartTime = 0;
 bool isPumpActive = false;
 const unsigned long pumpActiveDuration = 10000; // 10 seconds
 
-void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
+void printSensorData()
 {
-  memcpy(&sensorData, incomingData, sizeof(sensorData));
-  Serial.print("Bytes received: ");
-  Serial.println(len);
   Serial.print("Soil Moisture: ");
   Serial.println(sensorData.soilMoisture);
   Serial.print("Is Soil Wet: ");
@@ -38,13 +35,22 @@ void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
   Serial.print("Light Level: ");
   Serial.println(sensorData.lightLevel);
   Serial.println();
+}
+
+void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
+{
+  memcpy(&sensorData, incomingData, sizeof(sensorData));
+  Serial.print("Bytes received: ");
+  Serial.println(len);
+
+  printSensorData();
 
   checkHumidityAndControlPump();
 }
 
 void checkHumidityAndControlPump()
 {
-  if (sensorData.airHumidity > newHumidityThreshold && !isPumpActive)
+  if (sensorData.soilMoisture > soilMoistureThreshold && !isPumpActive)
   {
     Serial.println("Activating pump.");
     PumpWrapper::enablePump();
@@ -86,17 +92,17 @@ void sendDataToFirebase()
 // TODO: Try to retrieve the soil moisture threshold from Firebase and store it in the ESP32.
 void getHumidityThresholdFromFirebase()
 {
-  newHumidityThreshold = FirebaseWrapper::readIntData("Config/SoilMoistureThreshold");
+  soilMoistureThreshold = FirebaseWrapper::readIntData("Config/SoilMoistureThreshold");
 }
 
 // TODO: When the user changes the soil moisture threshold on the Blynk app, the value is stored
 // both in the ESP32 and in Firebase.
 void updateHumidityThreshold(float newThreshold)
 {
-  newHumidityThreshold = newThreshold;
-  Serial.println(newHumidityThreshold);
+  soilMoistureThreshold = newThreshold;
+  Serial.println(soilMoistureThreshold);
 
-  FirebaseWrapper::sendFloatData("Config/SoilMoistureThreshold", newHumidityThreshold);
+  FirebaseWrapper::sendFloatData("Config/SoilMoistureThreshold", soilMoistureThreshold);
   Serial.println("Soil Moisture Threshold saved to Firebase");
 }
 

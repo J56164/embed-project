@@ -25,6 +25,21 @@ void readSensors()
   sensorData.lightLevel = SensorsWrapper::getLightLevel();
 }
 
+void printSensorData()
+{
+  Serial.print("Soil Moisture: ");
+  Serial.println(sensorData.soilMoisture);
+  Serial.print("Is Soil Wet: ");
+  Serial.println(sensorData.isSoilWet);
+  Serial.print("Air Humidity: ");
+  Serial.println(sensorData.airHumidity);
+  Serial.print("Air Temperature: ");
+  Serial.println(sensorData.airTemperature);
+  Serial.print("Light Level: ");
+  Serial.println(sensorData.lightLevel);
+  Serial.println();
+}
+
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
   Serial.print("\r\nLast Packet Send Status:\t");
@@ -63,6 +78,7 @@ void setup()
 void loop()
 {
   readSensors();
+  printSensorData();
   sendSensorData();
 
   delay(3000);
