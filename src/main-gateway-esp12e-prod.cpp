@@ -57,14 +57,19 @@ void sendDataToFirebase()
 }
 
 // TODO: Try to retrieve the humidity threshold from Firebase and store it in the ESP32.
+void getHumidityThresholdFromFirebase()
+{
+  newHumidityThreshold = FirebaseWrapper::readIntData("Config/HumidityThreshold");
+}
 
 // TODO: When the user changes the humidity threshold on the Blynk app, the value is stored
 // both in the ESP32 and in Firebase.
-void updateHumidityThreshold(float newThreshold){
+void updateHumidityThreshold(float newThreshold)
+{
   newHumidityThreshold = newThreshold;
   Serial.println(newHumidityThreshold);
 
-  FirebaseWrapper::sendIntData("Sensors/Humidity",newHumidityThreshold)
+  FirebaseWrapper::sendIntData("Config/HumidityThreshold", newHumidityThreshold);
   Serial.println("Humidity Threshold saved to Firebase");
 }
 
