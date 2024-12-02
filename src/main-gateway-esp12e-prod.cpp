@@ -150,12 +150,12 @@ void setup()
   delay(100);
 
   WiFiWrapper::setupWiFi();
+  WiFi.printDiag(Serial);
   WiFiWrapper::setupESPNow();
   esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);
   WiFiWrapper::addPeer(broadcastAddress);
   WiFiWrapper::registerSendCallback(OnDataSent);
   WiFiWrapper::registerRecvCallback(OnDataRecv);
-  WiFi.printDiag(Serial);
 
   // Setup Blynk
   BlynkWrapper::setupBlynk();

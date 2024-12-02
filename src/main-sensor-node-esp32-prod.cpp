@@ -123,5 +123,10 @@ void loop()
   printSensorData();
   sendSensorData();
 
+  PumpWrapper::enablePump();
+  Serial.println("Pump High");
+  delay(1000);
+  PumpWrapper::disablePump();
+  Serial.println("Pump Low");
   delay(3000);
 }

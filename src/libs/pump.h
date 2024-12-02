@@ -10,14 +10,14 @@ namespace PumpWrapper
 {
     void enablePump()
     {
-        analogWrite(PUMP_PIN, HIGH);
+        digitalWrite(PUMP_PIN, HIGH);
         digitalWrite(PUMP_CONTROL_A_PIN, HIGH);
         digitalWrite(PUMP_CONTROL_B_PIN, LOW);
     }
 
     void disablePump()
     {
-        analogWrite(PUMP_PIN, LOW);
+        digitalWrite(PUMP_PIN, LOW);
         digitalWrite(PUMP_CONTROL_A_PIN, HIGH);
         digitalWrite(PUMP_CONTROL_B_PIN, LOW);
     }
