@@ -14,7 +14,9 @@ namespace SensorsWrapper
 
     void setupSoilSensor()
     {
+        pinMode(SOIL_ENABLE_PIN, OUTPUT);
         pinMode(SOIL_DIGITAL_PIN, INPUT);
+        digitalWrite(SOIL_ENABLE_PIN, HIGH);
     }
 
     int getSoilMoisture()

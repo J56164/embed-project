@@ -1,3 +1,4 @@
+#define SOIL_ENABLE_PIN D0
 #define SOIL_ANALOG_PIN A0
 #define SOIL_DIGITAL_PIN D1
 

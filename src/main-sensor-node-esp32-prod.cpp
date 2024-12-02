@@ -5,6 +5,8 @@
 
 uint8_t broadcastAddress[6] = {0xC4, 0x5B, 0xBE, 0x6F, 0xBD, 0x0B};
 
+bool isPumpOn = false;
+
 struct SensorData
 {
   int soilMoisture;
@@ -123,10 +125,17 @@ void loop()
   printSensorData();
   sendSensorData();
 
-  PumpWrapper::enablePump();
-  Serial.println("Pump High");
-  delay(1000);
-  PumpWrapper::disablePump();
-  Serial.println("Pump Low");
+  // For demo only
+  if (sensorData.soilMoisture >= 2000 & !isPumpOn)
+  {
+    PumpWrapper::enablePump();
+    Serial.println("Pump High");
+  }
+  else if (sensorData.soilMoisture < 2000 & isPumpOn)
+  {
+    PumpWrapper::disablePump();
+    Serial.println("Pump Low");
+  }
+
   delay(3000);
 }

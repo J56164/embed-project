@@ -66,7 +66,10 @@ void sendPumpCommand()
 {
   Serial.println("Sending pump command to sensor node...");
 
+  Blynk.disconnect();
   bool isCommandSent = WiFiWrapper::sendData(broadcastAddress, (uint8_t *)&pumpCommand, sizeof(pumpCommand));
+  delay(1000L);
+  Blynk.connect();
 
   if (isCommandSent)
   {
@@ -151,6 +154,8 @@ void setup()
 
   WiFiWrapper::setupWiFi();
   WiFi.printDiag(Serial);
+
+  // Setup ESPNow
   WiFiWrapper::setupESPNow();
   esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);
   WiFiWrapper::addPeer(broadcastAddress);
